@@ -5,6 +5,7 @@
 class IStream2 {
 private:
 FILE *ifile2;
+int buffer;
 
 public:
 IStream2();

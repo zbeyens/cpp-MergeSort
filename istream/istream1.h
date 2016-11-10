@@ -4,16 +4,13 @@
 #include <stdlib.h>
 
 class IStream1 {
-
 private:
-int descriptor;
+int ofile1;
 char buffer[4];
-bool eof;
 
 public:
 IStream1();
 void open(char *filename);
 int read_next();
 bool end_of_stream();
-
 };

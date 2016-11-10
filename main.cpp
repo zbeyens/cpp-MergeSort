@@ -11,6 +11,16 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    cout << "First method" << endl;
+    IStream1 reader1;
+    reader1.open(argv[1]);
+
+    while (!reader1.end_of_stream()) {
+        int res = reader1.read_next();
+        cout << res << endl;
+    }
+
+    cout << endl << "Second method" << endl;
     IStream2 reader2;
     OStream2 writer2;
     reader2.open(argv[1]);
@@ -22,14 +32,6 @@ int main(int argc, char *argv[]) {
         cout << res << endl;
     }
     writer2.close();
-
-    IStream1 reader1;
-    reader1.open(argv[1]);
-
-    while (!reader1.end_of_stream()) {
-        int res = reader1.read_next();
-        cout << res << endl;
-    }
 
     return 0;
 }

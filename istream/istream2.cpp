@@ -10,7 +10,6 @@ void IStream2::open(char *filename) {
     ifile = fopen(filename, "rb");
 
     if (ifile == NULL) {
-        // fputs("File error", stderr);
         cout << "Error not existing";
         exit(1);
     }
@@ -31,8 +30,6 @@ int IStream2::read_next() {
     // buffer = new char[size];
 
     //put the file content into the buffer
-    int buffer;
-    fread(&buffer, sizeof(int), 1, ifile2);
 
     return buffer;
 }
@@ -40,7 +37,7 @@ int IStream2::read_next() {
 bool IStream2::end_of_stream() {
     bool isEOF = false;
 
-    if (feof(ifile2)) {
+    if (fread(&buffer, sizeof(int), 1, ifile2) <= 0) {
         fclose(ifile2);
         isEOF = true;
     }

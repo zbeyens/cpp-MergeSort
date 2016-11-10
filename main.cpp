@@ -1,6 +1,6 @@
 #include <io.h>
 #include <iostream>
-#include "istream/istream2.h"
+#include "istream/istream1.h"
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -8,15 +8,13 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    IStream2 reader2;
-    reader2.open(argv[1]);
+    IStream1 reader1;
+    reader1.open(argv[1]);
 
-    while (!reader2.end_of_stream()) {
-        int res = reader2.read_next();
+    while (!reader1.end_of_stream()) {
+        int res = reader1.read_next();
         cout << res << endl;
     }
-
-    cout << endl;
 
     return 0;
 }

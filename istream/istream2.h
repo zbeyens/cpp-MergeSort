@@ -4,11 +4,12 @@
 
 class IStream2 {
 private:
+FILE *ifile2;
 
 public:
 IStream2();
 
-FILE * open(char *filename);
-char read_next(FILE *ifile);
-bool end_of_stream(FILE *ifile);
+void open(char *filename);
+int read_next();
+bool end_of_stream();
 };

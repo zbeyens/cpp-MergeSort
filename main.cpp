@@ -8,12 +8,12 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    IStream2 reader;
-    FILE *ifile2 = reader.open(argv[1]);
+    IStream2 reader2;
+    reader2.open(argv[1]);
 
-    while (!reader.end_of_stream(ifile2)) {
-        char res = reader.read_next(ifile2);
-        cout << res;
+    while (!reader2.end_of_stream()) {
+        int res = reader2.read_next();
+        cout << res << endl;
     }
 
     cout << endl;

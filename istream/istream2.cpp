@@ -4,22 +4,21 @@ using namespace std;
 
 IStream2::IStream2() {}
 
-FILE * IStream2::open(char *filename) { //char *filename
+void IStream2::open(char *filename) { //char *filename
     FILE *ifile;
 
-    ifile = fopen(filename, "r");
+    ifile = fopen(filename, "rb");
 
     if (ifile == NULL) {
         // fputs("File error", stderr);
-        cout << "hh";
+        cout << "Error not existing";
         exit(1);
     }
 
-    return ifile;
+    ifile2 = ifile;
 }
 
-char IStream2::read_next(FILE *ifile) {
-    // char *buffer;
+int IStream2::read_next() {
     // size_t size;
     // size_t result;
 
@@ -30,27 +29,19 @@ char IStream2::read_next(FILE *ifile) {
     //
     // //allocate memory buffer
     // buffer = new char[size];
-    //
-    // if (buffer == NULL) {
-    //     fputs("Memory error", stderr);
-    //     exit(2);
-    // }
-    // delete[] buffer;
 
     //put the file content into the buffer
-    // fread(buffer, 1, 10, ifile);
-
-    char buffer;
-    buffer = fgetc(ifile);
+    int buffer;
+    fread(&buffer, sizeof(int), 1, ifile2);
 
     return buffer;
 }
 
-bool IStream2::end_of_stream(FILE *ifile) {
+bool IStream2::end_of_stream() {
     bool isEOF = false;
 
-    if (feof(ifile)) {
-        fclose(ifile);
+    if (feof(ifile2)) {
+        fclose(ifile2);
         isEOF = true;
     }
 

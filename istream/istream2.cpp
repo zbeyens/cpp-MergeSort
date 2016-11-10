@@ -4,7 +4,7 @@ using namespace std;
 
 IStream2::IStream2() {}
 
-void IStream2::open(char *filename) { //char *filename
+void IStream2::open(char *filename) {
     FILE *ifile;
 
     ifile = fopen(filename, "rb");

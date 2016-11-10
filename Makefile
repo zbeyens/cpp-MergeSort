@@ -1,11 +1,15 @@
 CFLAGS=-Wall
-2=istream/istream2
+21=istream/istream2
+22=ostream/ostream2
 
-all: $(2).o
-	g++ $(2).o main.cpp -o main -std=c++11
+all: $(21).o $(22).o
+	g++ $(21).o $(22).o main.cpp -o main -std=c++11
 
-$(2).o: $(2).cpp
-	g++ -c $(2).cpp -o $(2).o
+$(21).o: $(21).cpp
+	g++ -c $(21).cpp -o $(21).o
+
+$(22).o: $(22).cpp
+	g++ -c $(22).cpp -o $(22).o
 
 clean:
 	rm *.o

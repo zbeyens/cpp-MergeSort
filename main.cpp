@@ -2,6 +2,8 @@
 #include <iostream>
 #include "istream/istream2.h"
 #include "ostream/ostream2.h"
+#include "istream/istream1.h"
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -20,6 +22,14 @@ int main(int argc, char *argv[]) {
         cout << res << endl;
     }
     writer2.close();
+
+    IStream1 reader1;
+    reader1.open(argv[1]);
+
+    while (!reader1.end_of_stream()) {
+        int res = reader1.read_next();
+        cout << res << endl;
+    }
 
     return 0;
 }

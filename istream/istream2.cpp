@@ -18,19 +18,6 @@ void IStream2::open(char *filename) {
 }
 
 int IStream2::read_next() {
-    // size_t size;
-    // size_t result;
-
-    // //get file size
-    // fseek(ifile, 0, SEEK_END);
-    // size = ftell(ifile);
-    // rewind(ifile);
-    //
-    // //allocate memory buffer
-    // buffer = new char[size];
-
-    //put the file content into the buffer
-
     return buffer;
 }
 

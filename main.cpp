@@ -3,6 +3,7 @@
 #include "istream/istream2.h"
 #include "ostream/ostream2.h"
 #include "istream/istream1.h"
+#include "boost/property_map/property_map.hpp"
 
 using namespace std;
 

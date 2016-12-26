@@ -19,9 +19,16 @@ int main(int argc, char *argv[]) {
     reader1.open(argv[1]);
     writer1.create(argv[2]);
 
+    int i = 0;
+
     while (!reader1.end_of_stream()) {
         vector<int> res = reader1.read_next();
-        writer1.write(res);
+
+        if (i == 0) {
+            writer1.write(res);
+        }
+
+        i++;
         // cout << res[0] << endl;
     }
     writer1.close();
@@ -46,10 +53,9 @@ int main(int argc, char *argv[]) {
     reader3.open(argv[1]);
     writer3.create(argv[2]);
 
-    while (!reader3.end_of_stream()) {
+    while (!reader3.end_of_stream())
         vector<int> res = reader3.read_next();
-        writer3.write(res);
-    }
+    // writer3.write(res);
     writer3.close();
 
     return 0;

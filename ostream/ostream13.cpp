@@ -17,8 +17,9 @@ void OStream13::create(char *filename) {
 
 void OStream13::write(vector<int> elems) {
     int *a = &elems[0];
+    cout << "hey" << elems[0] << endl;
     //marche pas...
-    // _write(ofile13, &a, elems.size());
+    _write(ofile13, &a, 4);
 }
 
 void OStream13::close() {

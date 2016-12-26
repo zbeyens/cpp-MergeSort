@@ -36,11 +36,10 @@ vector<int> IStream13::read_next() {
     for (int i = 0; i < Bcurrent; i++) {
         for (int j = 0; j < 4; j++) {
             temp[j] = buffer[4 * i + j];
-            cout << temp[j];
         }
 
         element[i] = *((int *)temp);
-        cout << " : " << element[i] << endl;
+        cout << element[i] << endl;
     }
 
     // memset(buffer, 0, sizeof(buffer) / sizeof(buffer[0]));

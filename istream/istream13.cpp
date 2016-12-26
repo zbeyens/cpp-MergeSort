@@ -35,7 +35,7 @@ vector<int> IStream13::read_next() {
 
     for (int i = 0; i < Bcurrent; i++) {
         for (int j = 0; j < 4; j++) {
-            temp[j] = buffer[i + j];
+            temp[j] = buffer[4 * i + j];
             cout << temp[j];
         }
 

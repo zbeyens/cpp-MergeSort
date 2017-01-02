@@ -1,5 +1,6 @@
 #include "istream/istream13.h"
 #include "istream/istream2.h"
+#include "istream/istream4.h"
 #include "ostream/ostream13.h"
 #include "ostream/ostream2.h"
 #include <io.h>
@@ -12,6 +13,8 @@ int main(int argc, char *argv[]) {
     if (argc != 3) {
         return 0;
     }
+
+    //-----------------FIRST METHOD-----------------
 
     cout << "First method" << endl;
     IStream13 reader1;
@@ -26,6 +29,8 @@ int main(int argc, char *argv[]) {
     }
     writer1.close();
 
+    //-----------------SECOND METHOD-----------------
+
     cout << endl << "Second method" << endl;
     IStream2 reader2;
     OStream2 writer2;
@@ -39,6 +44,8 @@ int main(int argc, char *argv[]) {
     }
     writer2.close();
 
+    //-----------------THIRD METHOD-----------------
+
     cout << endl << "Third method" << endl;
     static int B = 1024;
     IStream13 reader3(B);
@@ -51,6 +58,20 @@ int main(int argc, char *argv[]) {
         writer3.write(res);
     }
     writer3.close();
+
+    //-----------------FOURTH METHOD-----------------
+
+    cout << endl << "Fourth method" << endl;
+    IStream4 reader4(B);
+    //OStream4 writer4;
+    reader4.open(argv[1]);
+    //writer4.create(argv[2]);
+
+    while (!reader4.end_of_stream()) {
+        vector<int> res = reader4.read_next();
+        //writer4.write(res);
+    }
+    //writer4.close();
 
     return 0;
 }

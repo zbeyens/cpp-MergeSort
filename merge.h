@@ -11,7 +11,7 @@ struct Element {
 
 struct Comp {
   bool operator()(const Element &a, const Element &b) {
-    return a.value < b.value;
+    return a.value > b.value;
   }
 };
-vector<int> merge_sort(vector<vector<int>> listOfStreams);
+void merge_sort(vector<vector<int>> listOfStreams,vector<int> *output);

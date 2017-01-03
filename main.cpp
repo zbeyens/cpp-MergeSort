@@ -1,4 +1,3 @@
-#include "boost/property_map/property_map.hpp"
 #include "istream/istream13.h"
 #include "istream/istream2.h"
 #include "istream/istream4.h"
@@ -14,6 +13,8 @@ int main(int argc, char *argv[]) {
         cout << "Choose a method (1-4) in parameter 3";
         return 0;
     }
+
+    static int B = 2;
 
     //-----------------FIRST METHOD-----------------
 
@@ -53,7 +54,6 @@ int main(int argc, char *argv[]) {
 
     if (argv[3][0] == '3') {
         cout << endl << "Third method" << endl;
-        static int B = 1024;
         IStream13 reader3(B);
         OStream13 writer3;
         reader3.open(argv[1]);
@@ -75,10 +75,9 @@ int main(int argc, char *argv[]) {
         reader4.open(argv[1]);
         //writer4.create(argv[2]);
 
-        while (!reader4.end_of_stream()) {
+        while (!reader4.end_of_stream())
             vector<int> res = reader4.read_next();
-            //writer4.write(res);
-        }
+        //writer4.write(res);
         //writer4.close();
     }
 

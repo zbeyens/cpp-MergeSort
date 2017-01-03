@@ -10,13 +10,14 @@ using namespace boost::iostreams;
 
 class IStream4 {
 private:
-char *ipath;
+// char *ipath;
 int offset;
 int length;
 mapped_file_source ifile4;
+mapped_file_params param;
 int B;
 int Bcurrent;
-int * buffer;
+int *buffer;
 
 public:
 IStream4(int b);

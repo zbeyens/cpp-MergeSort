@@ -4,11 +4,12 @@ CFLAGS=-Wall
 21=istream/istream2
 22=ostream/ostream2
 41=istream/istream4
+dep=$(11).o $(12).o $(21).o $(22).o $(41).o
 
 LIBS = -lboost_iostreams
 
-all: $(11).o $(12).o $(21).o $(22).o $(41).o
-	g++ $(11).o $(12).o $(21).o $(22).o $(41).o main.cpp $(LIBS) -o main -std=c++11
+all: $(dep)
+	g++ $(dep) main.cpp $(LIBS) -o main -std=c++11
 
 $(11).o: $(11).cpp
 	g++ -c $(11).cpp -o $(11).o
@@ -31,4 +32,4 @@ run:
 	main $(ARGS)
 
 clean:
-	rm *.o $(11) $(12) $(21) $(22) $(41)
+	rm $(dep)

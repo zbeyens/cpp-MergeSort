@@ -10,9 +10,8 @@ using namespace boost::iostreams;
 
 class IStream4 {
 private:
-// char *ipath;
-int offset;
-int length;
+int offs;     //Mapped portion offset
+int len;     //Mapped portion length
 mapped_file_source ifile4;
 mapped_file_params param;
 int B;

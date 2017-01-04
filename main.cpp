@@ -11,10 +11,11 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  if (argc != 6) {
+  if (argc != 4) {
     cout << "Choose a method (1-4) in parameter 3";
     return 0;
   }
+
   //-----------------FIRST METHOD-----------------
   static int B = 2;
 

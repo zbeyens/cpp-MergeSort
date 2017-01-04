@@ -20,3 +20,5 @@ void OStream13::write(vector<int> elems) {
 }
 
 void OStream13::close() { _close(ofile13); }
+
+void OStream13::set_pointer_w(int place) { _lseek(ofile13, place, SEEK_SET); }

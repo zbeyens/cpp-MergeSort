@@ -86,78 +86,86 @@ int main(int argc, char *argv[]) {
 
     //---------------Part3------------------------------
 
-    // // variable
-    // int N;                        // size of the file in 32 bits integer
-    // static int M = atoi(argv[4]); // size of a stream in 32 bits integer
-    // int d = atoi(argv[5]);        // number of streams to merge
-    // queue<pair<int, int>, vector<pair<int, int>>> stream_ref;
-    // vector<int> *output = new vector<int>;
-    //
-    // // reader and writer initialization
-    // IStream13 reader3(M);
-    // reader3.open(argv[1]);
-    // OStream13 writer;
-    // writer.create(argv[1]);
-    //
-    // // find N and n
-    // N = int(reader3.get_length() / 4); //
-    // int n = int(N / M);                // number of streams
-    // if (N % M != 0) {
-    //   n += 1;
-    // }
-    //
-    // // 1.sort each stream
-    // int j = 0;
-    // while (!reader3.end_of_stream()) {
-    //   int pointer = 4 * j * M;
-    //   vector<int> sequence = reader3.read_next();
-    //   sort(sequence.begin(), sequence.end());
-    //   writer.write(sequence);
-    //   // 2.store
-    //   stream_ref.push((pointer, M));
-    //   j += 1;
-    // }
-    //
-    // // merge and sort every streams
-    // int l = 0;
-    // while (stream_ref.size() > 1) {
-    //
-    //   int x = stream_ref.size(); // number of stream to merge
-    //
-    //   // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
-    //   // file length
-    //
-    //   if (x < d) {
-    //     d = x;
-    //   }
-    //   if (l >= 4 * (N)) {
-    //     l = 0;
-    //   }
-    //
-    //   writer.set_pointer_w(l);
-    //   vector<vector<int>> sequence_to_merge(d);
-    //
-    // int sizeStreams = 0;
-    //
-    // for (int k = 0; k < d; k++) {
-    //     int pointer, int B = stream_ref.front();
-    //     reader3.set_pointer(pointer);
-    //     reader3.set_B(B);
-    //
-    //     if (!reader3.end_of_stream()) {
-    //         sequence_to_merge[k] = reader3.read_next();
-    //         sizeStreams += sequence_to_merge[k].size();
-    //     }
-    // }
-    //
-    // stream_ref.push((l, sizeStreams));
-    // l += 4 * sizeStreams;
-    //
-    //   merge_sort(sequence_to_merge, output);
-    //   writer.write(*output);
-    //   output->erase(output->begin(), output->end());
-    // }
-    // writer.close();
+    // variable
+    int N;                        // size of the file in 32 bits integer
+    static int M = atoi(argv[4]); // size of a stream in 32 bits integer
+    int d = atoi(argv[5]);        // number of streams to merge
+    queue<pair<int, int> > stream_ref;
+    vector<int> *output = new vector<int>;
+
+    // reader and writer initialization
+    IStream13 reader3(M);
+    reader3.open(argv[1]);
+    OStream13 writer;
+    writer.create(argv[1]);
+
+    // find N and n
+    N = int(reader3.get_length() / 4); //
+    int n = int(N / M);                // number of streams
+
+    if (N % M != 0) {
+        n += 1;
+    }
+
+    // 1.sort each stream
+    int j = 0;
+
+    while (!reader3.end_of_stream()) {
+        int pointer = 4 * j * M;
+        vector<int> sequence = reader3.read_next();
+        sort(sequence.begin(), sequence.end());
+        writer.write(sequence);
+        // 2.store
+        pair<int, int> newPair = make_pair(pointer, M);
+        stream_ref.push(newPair);
+        j += 1;
+    }
+
+    // merge and sort every streams
+    int l = 0;
+
+    while (stream_ref.size() > 1) {
+        int x = stream_ref.size(); // number of stream to merge
+
+        // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
+        // file length
+
+        if (x < d) {
+            d = x;
+        }
+
+        if (l >= 4 * (N)) {
+            l = 0;
+        }
+
+        writer.set_pointer_w(l);
+        vector<vector<int> > sequence_to_merge(d);
+
+        int sizeStreams = 0;
+
+        for (int k = 0; k < d; k++) {
+            pair<int, int> pairFront = stream_ref.front();
+            stream_ref.pop();
+            int pointer = pairFront.first;
+            int B = pairFront.second;
+            reader3.set_pointer(pointer);
+            reader3.set_B(B);
+
+            if (!reader3.end_of_stream()) {
+                sequence_to_merge[k] = reader3.read_next();
+                sizeStreams += sequence_to_merge[k].size();
+            }
+        }
+
+        pair<int, int> newPair = make_pair(l, sizeStreams);
+        stream_ref.emplace(newPair);
+        l += 4 * sizeStreams;
+
+        merge_sort(sequence_to_merge, output);
+        writer.write(*output);
+        output->erase(output->begin(), output->end());
+    }
+    writer.close();
 
     return 0;
 }

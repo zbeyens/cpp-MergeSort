@@ -134,23 +134,28 @@ int main(int argc, char *argv[]) {
     //     l = 0;
     //   }
     //
-    //   stream_ref.push((l, d * M));
     //   writer.set_pointer_w(l);
     //   vector<vector<int>> sequence_to_merge(d);
     //
-    //   for (int k = 0; k < d; k++) {
+    // int sizeStreams = 0;
+    //
+    // for (int k = 0; k < d; k++) {
     //     int pointer, int B = stream_ref.front();
     //     reader3.set_pointer(pointer);
     //     reader3.set_B(B);
+    //
     //     if (!reader3.end_of_stream()) {
-    //       sequence_to_merge[k] = reader3.read_next();
+    //         sequence_to_merge[k] = reader3.read_next();
+    //         sizeStreams += sequence_to_merge[k].size();
     //     }
-    //   }
+    // }
+    //
+    // stream_ref.push((l, sizeStreams));
+    // l += 4 * sizeStreams;
     //
     //   merge_sort(sequence_to_merge, output);
     //   writer.write(*output);
     //   output->erase(output->begin(), output->end());
-    //   l += 4 * d * M;
     // }
     // writer.close();
 

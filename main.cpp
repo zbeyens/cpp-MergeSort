@@ -12,160 +12,159 @@
 using namespace std;
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        cout << "Choose a method (1-4) in parameter 3";
-        return 0;
+  if (argc != 4) {
+    cout << "Choose a method (1-4) in parameter 3";
+    return 0;
+  }
+
+  //-----------------FIRST METHOD-----------------
+  static int B = 2;
+
+  if (argv[3][0] == '1') {
+    cout << "First method" << endl;
+    IStream13 reader1;
+    OStream13 writer1;
+    reader1.open(argv[1]);
+    writer1.create(argv[2]);
+
+    while (!reader1.end_of_stream()) {
+      vector<int> res = reader1.read_next();
+
+      writer1.write(res);
     }
+    writer1.close();
+  }
 
-    //-----------------FIRST METHOD-----------------
-    static int B = 2;
+  //-----------------SECOND METHOD-----------------
 
-    if (argv[3][0] == '1') {
-        cout << "First method" << endl;
-        IStream13 reader1;
-        OStream13 writer1;
-        reader1.open(argv[1]);
-        writer1.create(argv[2]);
+  if (argv[3][0] == '2') {
+    cout << endl << "Second method" << endl;
+    IStream2 reader2;
+    OStream2 writer2;
+    reader2.open(argv[1]);
+    writer2.create(argv[2]);
 
-        while (!reader1.end_of_stream()) {
-            vector<int> res = reader1.read_next();
-
-            writer1.write(res);
-        }
-        writer1.close();
+    while (!reader2.end_of_stream()) {
+      int res = reader2.read_next();
+      writer2.write(res);
+      cout << res << endl;
     }
+    writer2.close();
+  }
 
-    //-----------------SECOND METHOD-----------------
+  //-----------------THIRD METHOD-----------------
 
-    if (argv[3][0] == '2') {
-        cout << endl << "Second method" << endl;
-        IStream2 reader2;
-        OStream2 writer2;
-        reader2.open(argv[1]);
-        writer2.create(argv[2]);
-
-        while (!reader2.end_of_stream()) {
-            int res = reader2.read_next();
-            writer2.write(res);
-            cout << res << endl;
-        }
-        writer2.close();
-    }
-
-    //-----------------THIRD METHOD-----------------
-
-    if (argv[3][0] == '3') {
-        cout << endl << "Third method" << endl;
-        IStream13 reader3(B);
-        OStream13 writer3;
-        reader3.open(argv[1]);
-        writer3.create(argv[2]);
-
-        while (!reader3.end_of_stream()) {
-            vector<int> res = reader3.read_next();
-            writer3.write(res);
-        }
-        writer3.close();
-    }
-
-    //-----------------FOURTH METHOD-----------------
-
-    if (argv[3][0] == '4') {
-        cout << endl << "Fourth method" << endl;
-        IStream4 reader4(B);
-        // OStream4 writer4;
-        reader4.open(argv[1]);
-        // writer4.create(argv[2]);
-
-        while (!reader4.end_of_stream())
-            vector<int> res = reader4.read_next();
-        // writer4.write(res);
-        // writer4.close();
-        // writer4.close();
-    }
-
-    //---------------Part3------------------------------
-
-    // variable
-    int N;                        // size of the file in 32 bits integer
-    static int M = atoi(argv[4]); // size of a stream in 32 bits integer
-    int d = atoi(argv[5]);        // number of streams to merge
-    queue<pair<int, int> > stream_ref;
-    vector<int> *output = new vector<int>;
-
-    // reader and writer initialization
-    IStream13 reader3(M);
+  if (argv[3][0] == '3') {
+    cout << endl << "Third method" << endl;
+    IStream13 reader3(B);
+    OStream13 writer3;
     reader3.open(argv[1]);
-    OStream13 writer;
-    writer.create(argv[1]);
-
-    // find N and n
-    N = int(reader3.get_length() / 4); //
-    int n = int(N / M);                // number of streams
-
-    if (N % M != 0) {
-        n += 1;
-    }
-
-    // 1.sort each stream
-    int j = 0;
+    writer3.create(argv[2]);
 
     while (!reader3.end_of_stream()) {
-        int pointer = 4 * j * M;
-        vector<int> sequence = reader3.read_next();
-        sort(sequence.begin(), sequence.end());
-        writer.write(sequence);
-        // 2.store
-        pair<int, int> newPair = make_pair(pointer, M);
-        stream_ref.push(newPair);
-        j += 1;
+      vector<int> res = reader3.read_next();
+      writer3.write(res);
+    }
+    writer3.close();
+  }
+
+  //-----------------FOURTH METHOD-----------------
+
+  if (argv[3][0] == '4') {
+    cout << endl << "Fourth method" << endl;
+    IStream4 reader4(B);
+    // OStream4 writer4;
+    reader4.open(argv[1]);
+    // writer4.create(argv[2]);
+
+    while (!reader4.end_of_stream())
+      vector<int> res = reader4.read_next();
+    // writer4.write(res);
+    // writer4.close();
+    // writer4.close();
+  }
+
+  //---------------Part3------------------------------
+
+  // variable
+  int N;                        // size of the file in 32 bits integer
+  static int M = atoi(argv[4]); // size of a stream in 32 bits integer
+  int d = atoi(argv[5]);        // number of streams to merge
+  queue<pair<int, int>> stream_ref;
+  vector<int> *output = new vector<int>;
+
+  // reader and writer initialization
+  IStream13 reader3(M);
+  reader3.open(argv[1]);
+  OStream13 writer;
+  writer.create(argv[1]);
+
+  // find N and n
+  N = int(reader3.get_length() / 4); //
+  int n = int(N / M);                // number of streams
+
+  if (N % M != 0) {
+    n += 1;
+  }
+
+  // 1.sort each stream
+  int j = 0;
+  while (!reader3.end_of_stream()) {
+    int pointer = 4 * j * M;
+    vector<int> sequence = reader3.read_next();
+    sort(sequence.begin(), sequence.end());
+    writer.write(sequence);
+    // 2.store
+    pair<int, int> newPair = make_pair(pointer, M);
+    stream_ref.push(newPair);
+    j += 1;
+  }
+
+  // merge and sort every streams
+  int l = 0;
+  int s = d;
+  while (stream_ref.size() > 1) {
+    int x = stream_ref.size(); // number of stream to merge
+
+    // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
+    // file length
+
+    if (x < s) {
+      s = x;
     }
 
-    // merge and sort every streams
-    int l = 0;
-
-    while (stream_ref.size() > 1) {
-        int x = stream_ref.size(); // number of stream to merge
-
-        // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
-        // file length
-
-        if (x < d) {
-            d = x;
-        }
-
-        if (l >= 4 * (N)) {
-            l = 0;
-        }
-
-        writer.set_pointer_w(l);
-        vector<vector<int> > sequence_to_merge(d);
-
-        int sizeStreams = 0;
-
-        for (int k = 0; k < d; k++) {
-            pair<int, int> pairFront = stream_ref.front();
-            stream_ref.pop();
-            int pointer = pairFront.first;
-            int B = pairFront.second;
-            reader3.set_pointer(pointer);
-            reader3.set_B(B);
-
-            if (!reader3.end_of_stream()) {
-                sequence_to_merge[k] = reader3.read_next();
-                sizeStreams += sequence_to_merge[k].size();
-            }
-        }
-
-        pair<int, int> newPair = make_pair(l, sizeStreams);
-        stream_ref.emplace(newPair);
-        l += 4 * sizeStreams;
-
-        merge_sort(sequence_to_merge, output);
-        writer.write(*output);
-        output->erase(output->begin(), output->end());
+    if (l >= 4 * (N)) {
+      l = 0;
     }
-    writer.close();
 
-    return 0;
+    writer.set_pointer_w(l);
+    vector<vector<int>> sequence_to_merge(s);
+
+    int sizeStreams = 0;
+
+    for (int k = 0; k < s; k++) {
+      pair<int, int> pairFront = stream_ref.front();
+      stream_ref.pop();
+      int pointer = pairFront.first;
+      int B = pairFront.second;
+      reader3.set_pointer(pointer);
+      reader3.set_B(B);
+
+      if (!reader3.end_of_stream()) {
+        sequence_to_merge[k] = reader3.read_next();
+        sizeStreams += sequence_to_merge[k].size();
+      }
+    }
+
+    pair<int, int> newPair = make_pair(l, sizeStreams);
+    stream_ref.push(newPair);
+    l += 4 * sizeStreams;
+    s = d;
+    merge_sort(sequence_to_merge, output);
+    writer.write(*output);
+    output->erase(output->begin(), output->end());
+  }
+  writer.close();
+
+  return 0;
 }

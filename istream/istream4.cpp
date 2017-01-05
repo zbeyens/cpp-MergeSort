@@ -1,14 +1,14 @@
 #include "istream4.h"
 using namespace std;
 
-IStream4::IStream4(int b) {
-    // B = b;
+IStream4::IStream4() {
     Bcurrent = 0;
+    len = 0;
     offs = 0;
     buffer = new int[B];
 }
 
-void IStream4::open(char *filename) {
+void IStream4::open(char *filename){
     ifile4 = mapped_file_source();
     param.path = filename;
 
@@ -51,7 +51,7 @@ bool IStream4::end_of_stream() {
     cout << "Buffer size of " << bufferSize << " with offset " << offs << endl;
 
     if (bufferSize < 4) {
-        cout << "We arrived at the end of the file!!";
+        cout << "We arrived at the end of the file!!" << endl;
         isEOF = true;
     } else {
         cout << "alignment = " << ifile4.alignment() << endl;
@@ -62,4 +62,8 @@ bool IStream4::end_of_stream() {
     }
 
     return isEOF;
+}
+
+int IStream4::get_length() {
+    return len;
 }

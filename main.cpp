@@ -4,6 +4,7 @@
 #include "merge.h"
 #include "ostream/ostream13.h"
 #include "ostream/ostream2.h"
+#include "ostream/ostream4.h"
 #include <cstdlib>
 #include <io.h>
 #include <iostream>
@@ -13,7 +14,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
     if (argc != 4) {
-        cout << "Choose a method (1-4) in parameter 3";
+        cout << "Choose a method (1-4) in parameter 3" << endl;
         return 0;
     }
 
@@ -72,16 +73,24 @@ int main(int argc, char *argv[]) {
 
     if (argv[3][0] == '4') {
         cout << endl << "Fourth method" << endl;
-        IStream4 reader4(B);
-        // OStream4 writer4;
+        IStream4 reader4;
+        OStream2 file_maker;
+        OStream4 writer4;
         reader4.open(argv[1]);
-        // writer4.create(argv[2]);
 
-        while (!reader4.end_of_stream())
+        //Create file with sufficient memory for unmapping.
+        file_maker.create(argv[2]);
+        int length = reader4.get_length();
+        for (int i = 0; i < length; i++) file_maker.write(0);
+        file_maker.close();
+
+        writer4.create(argv[2]);
+
+        while (!reader4.end_of_stream()) {
             vector<int> res = reader4.read_next();
-        // writer4.write(res);
-        // writer4.close();
-        // writer4.close();
+            writer4.write(res);
+        }
+        writer4.close();
     }
 
     //---------------Part3------------------------------

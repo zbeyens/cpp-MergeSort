@@ -36,4 +36,4 @@ run:
 	main $(ARGS)
 
 clean:
-	rm $(dep)
+	rm *.o $(dep)

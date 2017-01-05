@@ -2,7 +2,7 @@
 using namespace std;
 
 IStream4::IStream4(int b) {
-    B = b;
+    // B = b;
     Bcurrent = 0;
     offs = 0;
     buffer = new int[B];
@@ -20,6 +20,8 @@ void IStream4::open(char *filename) {
         exit(1);
     }
 
+    //B must be a multiple of 65536
+    B = (ifile4.alignment() / 4);
     len = ifile4.size();
     ifile4.close();
     cout << "File length: " << len << endl;
@@ -33,7 +35,7 @@ vector<int> IStream4::read_next() {
 
     for (int i = 0; i < Bcurrent; i++) {
         element[i] = buffer[i];
-        cout << "Integer #" << i << " : " << element[i] << endl;
+        // cout << "Integer #" << i << " : " << element[i] << endl;
     }
 
     ifile4.close();
@@ -52,13 +54,9 @@ bool IStream4::end_of_stream() {
         cout << "We arrived at the end of the file!!";
         isEOF = true;
     } else {
-        cout << "We aren't at the end of the file yet, " ;
         cout << "alignment = " << ifile4.alignment() << endl;
         param.length = bufferSize;
-        param.offset = offs * ifile4.alignment();
-        // param.flags = mapped_file_base::mode::priv;
-        // boost::intmax_t off = offs;
-        cout << "Offset bug happens here." << endl;
+        param.offset = offs;
         ifile4.open(param);
         offs += bufferSize;
     }

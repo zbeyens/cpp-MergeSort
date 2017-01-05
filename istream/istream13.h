@@ -23,4 +23,5 @@ public:
   bool end_of_stream();
   int get_length();
   void set_pointer(int place);
+  void set_B(int b);
 };

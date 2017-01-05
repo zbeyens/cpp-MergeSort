@@ -1,10 +1,11 @@
 CFLAGS=-Wall
+01=merge
 11=istream/istream13
 12=ostream/ostream13
 21=istream/istream2
 22=ostream/ostream2
 41=istream/istream4
-dep=$(11).o $(12).o $(21).o $(22).o $(41).o
+dep=$(01).o $(11).o $(12).o $(21).o $(22).o $(41).o
 
 LIBS = -lboost_iostreams
 
@@ -25,6 +26,9 @@ $(22).o: $(22).cpp
 
 $(41).o: $(41).cpp
 	g++ -c $(41).cpp -o $(41).o
+
+$(01).o: $(01).cpp
+	g++ -c $(01).cpp -o $(01).o
 
 default: main
 

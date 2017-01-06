@@ -5,7 +5,9 @@ using namespace std;
 OStream13::OStream13() {}
 
 void OStream13::create(char *filename) {
-  int ofile = _open(filename, _O_WRONLY);
+
+  int ofile = _open(filename, _O_WRONLY | _O_CREAT | _O_TEMPORARY, _S_IWRITE);
+  file_name = filename;
 
   if (ofile == -1) {
     cout << "Error";
@@ -21,4 +23,4 @@ void OStream13::write(vector<int> elems) {
 
 void OStream13::close() { _close(ofile13); }
 
-void OStream13::set_pointer_w(int place) { _lseek(ofile13, place, SEEK_SET); }
+char *OStream13::get_filename() { return file_name; }

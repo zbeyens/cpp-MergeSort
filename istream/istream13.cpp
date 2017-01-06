@@ -30,16 +30,13 @@ void IStream13::open(char *filename) {
 vector<int> IStream13::read_next() {
   char temp[4];
   vector<int> element(Bcurrent);
-
-  cout << "B :" << Bcurrent << endl;
-
   for (int i = 0; i < Bcurrent; i++) {
     for (int j = 0; j < 4; j++) {
       temp[j] = buffer[4 * i + j];
     }
 
     element[i] = *((int *)temp);
-    cout << element[i] << endl;
+    // cout << element[i] << endl;
   }
 
   // memset(buffer, 0, sizeof(buffer) / sizeof(buffer[0]));
@@ -53,7 +50,7 @@ bool IStream13::end_of_stream() {
   int bufferSize = 4 * B >= length - offset ? length - offset : 4 * B;
   Bcurrent = bufferSize / 4;
 
-  if (bufferSize < 4 || _read(ofile13, buffer, bufferSize) <= 0) {
+  if (bufferSize < 4 || _read(ofile13, buffer, bufferSize) < 0) {
     _close(ofile13);
     isEOF = true;
   }

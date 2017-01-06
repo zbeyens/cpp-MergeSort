@@ -4,12 +4,12 @@
 
 class OStream2 {
 private:
-FILE *ofile2;
+  FILE *ofile2;
 
 public:
-OStream2();
+  OStream2();
 
-void create(char *filename);
-void write(int elem);
-void close();
+  void create(char *filename);
+  void write(int elem);
+  void close();
 };

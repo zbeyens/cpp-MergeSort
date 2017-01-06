@@ -2,6 +2,7 @@
 
 using namespace std;
 
+OStream2::OStream2() {}
 
 void OStream2::create(char *filename) {
     FILE *ofile;

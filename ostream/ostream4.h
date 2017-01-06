@@ -9,17 +9,17 @@ using namespace boost::iostreams;
 
 class OStream4 {
 private:
-  int offs;     //Mapped portion offset
-  mapped_file_sink ofile4;
-  mapped_file_params param;
-  int B;
-  int *buffer;
+int offs;       //Mapped portion offset
+mapped_file_sink ofile4;
+mapped_file_params param;
+int B;
+int *buffer;
 
 public:
-  OStream4();
+OStream4();
 
-  void create(char *filename);
-  void write(std::vector<int> elem);
-  void close();
-  void set_pointer_w(int place);
+void create(char *filename);
+void write(std::vector<int> elem);
+void close();
+void set_pointer_w(int place);
 };

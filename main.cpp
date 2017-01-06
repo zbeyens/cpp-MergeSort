@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
         while (!reader2.end_of_stream()) {
             int res = reader2.read_next();
             writer2.write(res);
-            cout << res << endl;
         }
         writer2.close();
     }
@@ -79,10 +78,14 @@ int main(int argc, char *argv[]) {
         reader4.open(argv[1]);
 
         //Create file with sufficient memory for unmapping.
-        file_maker.create(argv[2]);
-        int length = reader4.get_length();
-        for (int i = 0; i < length; i++) file_maker.write(0);
-        file_maker.close();
+        // file_maker.create(argv[2]);
+        // int length = reader4.get_length() / 4;
+        //
+        // for (int i = 0; i < length; i++) {
+        //     file_maker.write(0);
+        // }
+        //
+        // file_maker.close();
 
         writer4.create(argv[2]);
 

@@ -4,13 +4,16 @@ using namespace std;
 IStream13::IStream13() {
     B = 1;
     offset = 0;
-    buffer = new char[B];
 }
 
 IStream13::IStream13(int b) {
-    B = b;
+    if (b == 0) {
+        B = 1;
+    } else {
+        B = b;
+    }
+
     offset = 0;
-    buffer = new char[B];
 }
 
 void IStream13::open(char *filename) {
@@ -31,8 +34,6 @@ vector<int> IStream13::read_next() {
     char temp[4];
     vector<int> element(Bcurrent);
 
-    // cout << "B :" << Bcurrent << endl;
-
     for (int i = 0; i < Bcurrent; i++) {
         for (int j = 0; j < 4; j++) {
             temp[j] = buffer[4 * i + j];
@@ -42,7 +43,7 @@ vector<int> IStream13::read_next() {
         // cout << element[i] << ",";
     }
 
-    // memset(buffer, 0, sizeof(buffer) / sizeof(buffer[0]));
+    delete[] buffer;
     return element;
 }
 
@@ -51,13 +52,14 @@ bool IStream13::end_of_stream() {
     offset = _lseek(ofile13, 0, SEEK_CUR);
 
     int bufferSize = 4 * B >= length - offset ? length - offset : 4 * B;
+
     Bcurrent = bufferSize / 4;
 
-    if (bufferSize < 4) {
+    if (bufferSize == 0) {
         _close(ofile13);
-        delete[] buffer;
         isEOF = true;
     } else {
+        buffer = new char[bufferSize];
         _read(ofile13, buffer, bufferSize);
     }
 

@@ -9,92 +9,141 @@
 #include <io.h>
 #include <iostream>
 #include <utility>
+#include <boost/chrono.hpp>
 
 using namespace std;
+using namespace boost::chrono;
+
+// param 1: method
+// param 2: factorB
+// param 3: k
+// param 4: N
+
+void method1read(char *fn, vector<int> &stream);
+void method2read(char *fn, vector<int> &stream);
+void method3read(char *fn, vector<int> &stream, int B);
+void method4read(char *fn, vector<int> &stream, int factorB);
+void method1write(char *fn, vector<int> stream);
+void method2write(char *fn, vector<int> stream);
+void method13write(char *fn, vector<int> stream);
+void method4write(char *fn, vector<int> stream);
+
+void method1read(char *fn, vector<int> &stream) {
+    method3read(fn, stream, 0);
+}
+
+void method2read(char *fn, vector<int> &stream) {
+    IStream2 reader2;
+    reader2.open(fn);
+
+    while (!reader2.end_of_stream()) {
+        int newElem = reader2.read_next();
+        stream.push_back(newElem);
+    }
+}
+
+void method2write(char *fn, vector<int> stream) {
+    OStream2 writer2;
+    writer2.create(fn);
+
+    for (size_t i = 0; i < stream.size(); i++) {
+        writer2.write(stream[i]);
+    }
+
+    writer2.close();
+}
+
+void method3read(char *fn, vector<int> &stream, int B) {
+    IStream13 reader3(B);
+    reader3.open(fn);
+
+    while (!reader3.end_of_stream()) {
+        vector<int> newElem = reader3.read_next();
+        stream.insert(stream.end(), newElem.begin(), newElem.end());
+    }
+}
+
+void method13write(char *fn, vector<int> stream) {
+    OStream13 writer13;
+    writer13.create(fn);
+    writer13.write(stream);
+    writer13.close();
+}
+
+void method4read(char *fn, vector<int> &stream, int factorB) {
+    IStream4 reader4(factorB);
+    reader4.open(fn);
+
+    while (!reader4.end_of_stream()) {
+        vector<int> newElem = reader4.read_next();
+        stream.insert(stream.end(), newElem.begin(), newElem.end());
+    }
+}
+
+void method4write(char *fn, vector<int> stream) {
+    OStream4 writer4;
+    writer4.create(fn);
+    writer4.write(stream);
+    writer4.close();
+}
 
 int main(int argc, char *argv[]) {
-    if (argc != 4) {
-        cout << "Choose a method (1-4) in parameter 3" << endl;
-        return 0;
-    }
+    // if (argc != 4) {
+    //     cout << "Choose a method read(1-4) in parameter 3" << endl;
+    //     return 0;
+    // }
 
-    //-----------------FIRST METHOD-----------------
-    static int B = 2;
+    //parameters
+    int method = atoi(argv[1]);
+    int factorB = atoi(argv[2]);
+    int B = factorB * 65536 / 4;
+    cout << "Method " << atoi(argv[1]) << ", B = " << B << endl;
+    int k = atoi(argv[3]);
+    int N = atoi(argv[4]);
 
-    if (argv[3][0] == '1') {
-        cout << "First method" << endl;
-        IStream13 reader1;
-        OStream13 writer1;
-        reader1.open(argv[1]);
-        writer1.create(argv[2]);
+    //start chrono
+    high_resolution_clock::time_point start = high_resolution_clock::now();
 
-        while (!reader1.end_of_stream()) {
-            vector<int> res = reader1.read_next();
+    //read k streams and write them, N times
+    for (int n = 0; n < N; n++) {
+        vector<vector<int> > streams;
 
-            writer1.write(res);
+        for (int i = 0; i < k; i++) {
+            string filename = "filegen/" + to_string(i + 1) + ".bin";
+            char *fn = const_cast<char *>(filename.c_str());
+            cout << "Sample " << n << ": reading " << fn << endl;
+            vector<int> stream;
+
+            if (method == 1) {
+                method1read(fn, stream);
+            } else if (method == 2) {
+                method2read(fn, stream);
+            } else if (method == 3) {
+                method3read(fn, stream, B);
+            } else if (method == 4) {
+                method4read(fn, stream, factorB);
+            }
+
+            streams.push_back(stream);
         }
-        writer1.close();
-    }
 
-    //-----------------SECOND METHOD-----------------
+        for (int i = 0; i < k; i++) {
+            string filename = "filegen/" + to_string(i + 1) + ".bin";
+            char *fn = const_cast<char *>(filename.c_str());
+            cout << "Sample " << n << ": writing " << fn << endl;
 
-    if (argv[3][0] == '2') {
-        cout << endl << "Second method" << endl;
-        IStream2 reader2;
-        OStream2 writer2;
-        reader2.open(argv[1]);
-        writer2.create(argv[2]);
-
-        while (!reader2.end_of_stream()) {
-            int res = reader2.read_next();
-            writer2.write(res);
+            if (method == 1 || method == 3) {
+                method13write(fn, streams[i]);
+            } else if (method == 2) {
+                method2write(fn, streams[i]);
+            } else if (method == 4) {
+                method4write(fn, streams[i]);
+            }
         }
-        writer2.close();
     }
 
-    //-----------------THIRD METHOD-----------------
-
-    if (argv[3][0] == '3') {
-        cout << endl << "Third method" << endl;
-        IStream13 reader3(B);
-        OStream13 writer3;
-        reader3.open(argv[1]);
-        writer3.create(argv[2]);
-
-        while (!reader3.end_of_stream()) {
-            vector<int> res = reader3.read_next();
-            writer3.write(res);
-        }
-        writer3.close();
-    }
-
-    //-----------------FOURTH METHOD-----------------
-
-    if (argv[3][0] == '4') {
-        cout << endl << "Fourth method" << endl;
-        IStream4 reader4;
-        OStream2 file_maker;
-        OStream4 writer4;
-        reader4.open(argv[1]);
-
-        //Create file with sufficient memory for unmapping.
-        // file_maker.create(argv[2]);
-        // int length = reader4.get_length() / 4;
-        //
-        // for (int i = 0; i < length; i++) {
-        //     file_maker.write(0);
-        // }
-        //
-        // file_maker.close();
-
-        writer4.create(argv[2]);
-
-        while (!reader4.end_of_stream()) {
-            vector<int> res = reader4.read_next();
-            writer4.write(res);
-        }
-        writer4.close();
-    }
+    milliseconds ms = duration_cast<milliseconds> (high_resolution_clock::now() - start);
+    cout << "Took " << ms.count() << "ms" << endl;
 
     //---------------Part3------------------------------
 

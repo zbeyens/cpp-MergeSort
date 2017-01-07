@@ -1,11 +1,12 @@
 #include "ostream13.h"
+#include "sys/stat.h"
 
 using namespace std;
 
 OStream13::OStream13() {}
 
 void OStream13::create(char *filename) {
-    int ofile = _open(filename, _O_WRONLY);
+    int ofile = _open(filename, _O_WRONLY | _O_BINARY);
 
     if (ofile == -1) {
         cout << "Error";
@@ -16,7 +17,6 @@ void OStream13::create(char *filename) {
 }
 
 void OStream13::write(vector<int> elems) {
-    // _write(ofile13, &elems[0], elems.size() * 4);
     _write(ofile13, &elems[0], elems.size() * 4);
 }
 

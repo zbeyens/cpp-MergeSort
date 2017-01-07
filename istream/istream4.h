@@ -14,12 +14,13 @@ int offs;     //Mapped portion offset
 int len;     //Mapped file's full length
 mapped_file_source ifile4;
 mapped_file_params param;
+int factorB;
 int B;
 int Bcurrent;
 int *buffer;
 
 public:
-IStream4();
+IStream4(int b);
 void open(char *filename);
 std::vector<int> read_next();
 bool end_of_stream();

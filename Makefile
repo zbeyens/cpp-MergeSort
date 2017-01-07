@@ -8,7 +8,7 @@ CFLAGS=-Wall
 42=ostream/ostream4
 dep=$(01).o $(11).o $(12).o $(21).o $(22).o $(41).o $(42).o
 
-LIBS = -lboost_iostreams
+LIBS = -lboost_iostreams -lboost_system -lboost_chrono
 
 all: $(dep)
 	g++ $(dep) main.cpp $(LIBS) -o main -std=c++11

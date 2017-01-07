@@ -12,6 +12,7 @@
 #include <string>
 #include <utility>
 #include <boost/chrono.hpp>
+#include <fstream>
 
 using namespace std;
 using namespace boost::chrono;
@@ -21,6 +22,8 @@ using namespace boost::chrono;
 // param 3: k
 // param 4: N1: number of times to read
 
+char * genFilename(string filename);
+void countKmax();
 void method1read(char *fn, vector<int> &stream);
 void method2read(char *fn, vector<int> &stream);
 void method3read(char *fn, vector<int> &stream, int B);
@@ -29,6 +32,23 @@ void method1write(char *fn, vector<int> stream);
 void method2write(char *fn, vector<int> stream);
 void method13write(char *fn, vector<int> stream);
 void method4write(char *fn, vector<int> stream);
+
+char * genFilename(string filename) {
+    return const_cast<char *>(filename.c_str());
+}
+
+void countKmax() {
+    int count = 0;
+    ofstream *f;
+    do {
+        string fn = to_string(count++);
+        f = new ofstream(fn);
+    } while (*f << "test" << flush);
+    --count;   // last iteration failed to open the file.
+
+
+    cout << "Your computer can open " << count  << " streams" << endl;
+}
 
 void method1read(char *fn, vector<int> &stream) {
     method3read(fn, stream, 0);
@@ -103,16 +123,21 @@ int main(int argc, char *argv[]) {
     int k = atoi(argv[3]);
     int N = atoi(argv[4]);
 
+    if (method == 0) {
+        countKmax();
+    }
+
     //start chrono
     high_resolution_clock::time_point start = high_resolution_clock::now();
 
     //read k streams and write them, N times
+
     for (int n = 0; n < N; n++) {
         vector<vector<int> > streams;
 
         for (int i = 0; i < k; i++) {
             string filename = "filegen/" + to_string(i + 1) + ".bin";
-            char *fn = const_cast<char *>(filename.c_str());
+            char *fn = genFilename(filename);
             cout << "Sample " << n << ": reading " << fn << endl;
             vector<int> stream;
 
@@ -131,7 +156,7 @@ int main(int argc, char *argv[]) {
 
         for (int i = 0; i < k; i++) {
             string filename = "filegen/" + to_string(i + 1) + ".bin";
-            char *fn = const_cast<char *>(filename.c_str());
+            char *fn = genFilename(filename);
             cout << "Sample " << n << ": writing " << fn << endl;
 
             if (method == 1 || method == 3) {
@@ -164,71 +189,74 @@ int main(int argc, char *argv[]) {
         IStream13 reader3(M);
         reader3.open(input_file);
         // find N and n
-        N = int(reader3.get_length() / 4); //
-        int n = ceil(N / M);            // number of streams
-        cout << "M= " << M << ", d= " << d << endl;
-        cout << "file length= " << reader3.get_length() << ", N= " << N
+        N = int(reader3.get_length() / 4);
+        int n = ceil(N / M); // number of streams
+        cout << "M = " << M << ", d = " << d << endl;
+        cout << "file length = " << reader3.get_length() << ", N = " << N
              << ", nbstreams= " << n << endl;
 
         // 1.sort each stream
-        int j = 0;
         reader3.set_pointer(0);
 
-        while (j < n) {
+        //N/M times
+        for (int i = 0; i < n; i++) {
+            //read and sort M element of the input file
             if (!reader3.end_of_stream()) {
-                cout << "j = " << j << endl;
+                // cout << endl << "Split i = " << i << endl;
                 vector<int> sequence = reader3.read_next();
-                cout << "sequence size = " << sequence.size() << endl;
+                // cout << "sequence size = " << sequence.size() << endl;
                 sort(sequence.begin(), sequence.end());
-                OStream13 *writer = new OStream13();
-                // choose name and convert into a char*
-                string filename = "file" + to_string(j) + ".bin";
-                char *name = new char[filename.length()];
-                strcpy(name, filename.c_str());
-                cout << name << endl;
-                // create the file
-                cout << " creation of " << name << " ..." << endl;
-                writer->create(name);
-                cout << "file created " << endl;
-                // delete[] name;
-                writer->write(sequence);
-                // 2.store the reference
-                stream_ref.push(*writer);
-            }
 
-            j += 1;
+                // for (size_t j = 0; j < sequence.size(); j++) {
+                //     cout << sequence[j] << ",";
+                // }
+
+                //create a stream of M element
+                string filename = "file" + to_string(i) + ".bin";
+                char *name = genFilename(filename);
+                OStream13 writer;
+                writer.create(name);
+                writer.write(sequence);
+                stream_ref.push(writer);
+                cout << stream_ref.front().get_filename() << ",,," << endl;
+            }
         }
+
+        //WTF ?
+        cout << stream_ref.size() << ",,," << endl;
+
 
         // merge and sort every streams
         int l = 0;
-        int s = d;
         int x = (int)stream_ref.size();
         cout << "ready for merging" << endl;
 
         while (x > 1) {
             // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
             // file length
+            int s = d;
 
             if (x < s) {
+                cout << "last merge" << endl;
                 s = x;
             }
 
-            vector<vector<int> > sequence_to_merge(s);
+            vector<vector<int> > sequence_to_merge;
 
-            for (int k = 0; k < s; k++) {
-                OStream13 writer2 = stream_ref.front();
+            for (int p = 0; p < s; p++) {
+                OStream13 writer = stream_ref.front();
                 stream_ref.pop();
                 IStream13 reader;
-                cout << "open : " << writer2.get_filename() << endl;
-                reader.open(writer2.get_filename());
+                cout << "opening " << writer.get_filename() << endl;
+                reader.open(writer.get_filename());
                 int length = reader.get_length();
                 reader.set_B(length);
 
                 if (!reader.end_of_stream()) {
-                    sequence_to_merge[k] = reader.read_next();
+                    sequence_to_merge.push_back(reader.read_next());
                 }
 
-                writer2.close();
+                writer.close();
             }
 
             OStream13 *writer3 = new OStream13();

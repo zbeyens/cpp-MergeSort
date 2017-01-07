@@ -1,4 +1,4 @@
-CFLAGS=-Wall
+CFLAGS=-Wall6
 01=merge
 11=istream/istream13
 12=ostream/ostream13

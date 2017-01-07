@@ -23,11 +23,6 @@ void OStream13::write(vector<int> elems) {
 
 void OStream13::close() {
     _close(ofile13);
-    free();
-}
-
-void OStream13::free() {
-    delete[] file_name;
 }
 
 char * OStream13::get_filename() {

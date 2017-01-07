@@ -20,15 +20,16 @@ using namespace boost::chrono;
 // param 1: method
 // param 2: factorB
 // param 3: k (max 30)
-// param 4: N: number of int to read
+// param 4: repeat number for an average
+// param 8: number of int to read (for method 1 and 2)
 
 char * genFilename(string filename);
 void countKmax();
-void method13open(char *fn, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams);
-void method2open(char *fn, vector<IStream2> &istreams, vector<OStream2> &ostreams);
-void method4open(char *fn, int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams);
-void method13(IStream13 &reader13, OStream13 &writer13);
-void method2(IStream2 &reader2, OStream2 &writer2);
+void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams);
+void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream2> &ostreams);
+void method4open(char *fn,  char *fno,  int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams);
+void method13(IStream13 &reader13, OStream13 &writer13, int N);
+void method2(IStream2 &reader2, OStream2 &writer2, int N);
 void method4(IStream4 &reader4, OStream4 &writer4);
 
 char * genFilename(string filename) {
@@ -48,46 +49,51 @@ void countKmax() {
     cout << "Your computer can open " << count  << " streams" << endl;
 }
 
-void method13open(char *fn, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams) {
+void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams) {
     IStream13 reader13(B);
     reader13.open(fn);
     istreams.push_back(reader13);
     OStream13 writer13;
-    writer13.create(fn);
+    writer13.create(fno);
     ostreams.push_back(writer13);
 }
 
-void method2open(char *fn, vector<IStream2> &istreams, vector<OStream2> &ostreams) {
+void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream2> &ostreams) {
     IStream2 reader2 = IStream2();
     reader2.open(fn);
     istreams.push_back(reader2);
-    cout << istreams[0].get_filename() << endl;
     OStream2 writer2;
-    writer2.create(fn);
+    writer2.create(fno);
     ostreams.push_back(writer2);
 }
 
-void method4open(char *fn, int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams) {
+void method4open(char *fn, char *fno, int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams) {
     IStream4 reader4(factorB);
     reader4.open(fn);
     istreams.push_back(reader4);
     OStream4 writer4;
-    writer4.create(fn);
+    writer4.create(fno);
     ostreams.push_back(writer4);
 }
 
-void method13(IStream13 &reader13, OStream13 &writer13) {
-    while (!reader13.end_of_stream()) {
+void method13(IStream13 &reader13, OStream13 &writer13, int N) {
+    int n = 0;
+
+    while (!reader13.end_of_stream() && n != N) {
         vector<int> newElem = reader13.read_next();
         writer13.write(newElem);
+        n++;
     }
     writer13.close();
 }
 
-void method2(IStream2 &reader2, OStream2 &writer2) {
-    while (!reader2.end_of_stream()) {
+void method2(IStream2 &reader2, OStream2 &writer2, int N) {
+    int n = 0;
+
+    while (!reader2.end_of_stream() && n != N) {
         int newElem = reader2.read_next();
         writer2.write(newElem);
+        n++;
     }
     writer2.close();
 }
@@ -112,7 +118,8 @@ int main(int argc, char *argv[]) {
     int B = factorB * 65536 / 4;
     cout << "Method " << atoi(argv[1]) << ", B = " << B << endl;
     int k = atoi(argv[3]);
-    int N = atoi(argv[4]);
+    int repeat = atoi(argv[4]);
+    int N = atoi(argv[8]);
 
     if (method == 0) {
         countKmax();
@@ -123,7 +130,7 @@ int main(int argc, char *argv[]) {
 
     //read k streams and write them, N times
 
-    for (int n = 0; n < N; n++) {
+    for (int r = 0; r < repeat; r++) {
         if (method == 1 || method == 3) {
             vector<IStream13> istreams;
             vector<OStream13> ostreams;
@@ -131,17 +138,19 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < k; i++) {
                 string filename = "filegen/" + to_string(i + 1) + ".bin";
                 char *fn = genFilename(filename);
-                cout << "Sample " << n << ": reading " << fn << endl;
+                filename = "filegen/o" + to_string(i + 1) + ".bin";
+                char *fno = genFilename(filename);
 
                 if (method == 1) {
-                    method13open(fn, 0, istreams, ostreams);
+                    method13open(fn, fno, 0, istreams, ostreams);
                 } else if (method == 3) {
-                    method13open(fn, B, istreams, ostreams);
+                    method13open(fn, fno, B, istreams, ostreams);
                 }
             }
 
             for (int i = 0; i < k; i++) {
-                method13(istreams[i], ostreams[i]);
+                cout << "Sample " << r << ": reading " << i << endl;
+                method13(istreams[i], ostreams[i], N);
             }
         } else if (method == 2) {
             vector<IStream2> istreams;
@@ -150,12 +159,15 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < k; i++) {
                 string filename = "filegen/" + to_string(i + 1) + ".bin";
                 char *fn = genFilename(filename);
-                cout << "Sample " << n << ": reading " << fn << endl;
-                method2open(fn, istreams, ostreams);
+
+                filename = "filegen/o" + to_string(i + 1) + ".bin";
+                char *fno = genFilename(filename);
+                method2open(fn, fno, istreams, ostreams);
             }
 
             for (int i = 0; i < k; i++) {
-                method2(istreams[i], ostreams[i]);
+                cout << "Sample " << r << ": reading " << i << endl;
+                method2(istreams[i], ostreams[i], N);
             }
         } else if (method == 4) {
             vector<IStream4> istreams;
@@ -164,11 +176,13 @@ int main(int argc, char *argv[]) {
             for (int i = 0; i < k; i++) {
                 string filename = "filegen/" + to_string(i + 1) + ".bin";
                 char *fn = genFilename(filename);
-                cout << "Sample " << n << ": reading " << fn << endl;
-                method4open(fn, factorB, istreams, ostreams);
+                filename = "filegen/o" + to_string(i + 1) + ".bin";
+                char *fno = genFilename(filename);
+                method4open(fn, fno, factorB, istreams, ostreams);
             }
 
             for (int i = 0; i < k; i++) {
+                cout << "Sample " << r << ": reading " << i << endl;
                 method4(istreams[i], ostreams[i]);
             }
         }
@@ -177,10 +191,10 @@ int main(int argc, char *argv[]) {
     milliseconds ms = duration_cast<milliseconds> (high_resolution_clock::now() - start);
     cout << "Took " << ms.count() << "ms" << endl;
 
-    //---------------Part3------------------------------
-    //param 5: M: size of the main memory available (first sort phase)
-    //param 6: d: the number of streams to merge in one pass (in the later sort phases)
-    //param 7: file input
+//---------------Part3------------------------------
+//param 5: M: size of the main memory available (first sort phase)
+//param 6: d: the number of streams to merge in one pass (in the later sort phases)
+//param 7: file input
     if (method == 5) {
         int N;                     // size of the file in 32 bits integer
         static int M = atoi(argv[5]); // size of a stream in 32 bits integer

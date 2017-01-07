@@ -17,4 +17,5 @@ public:
   void write(std::vector<int> elem);
   void close();
   char *get_filename();
+  void free();
 };

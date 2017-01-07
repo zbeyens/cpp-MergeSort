@@ -112,27 +112,24 @@ int main(int argc, char *argv[]) {
   reader3.set_pointer(0);
   while (j < n) {
     if (!reader3.end_of_stream()) {
-      cout << j << " er0" << endl;
+      cout << "j = " << j << endl;
       vector<int> sequence = reader3.read_next();
-      cout << j << " er1" << endl;
+      cout << "sequence size = " << sequence.size() << endl;
       sort(sequence.begin(), sequence.end());
-      cout << j << " er2" << endl;
       OStream13 *writer = new OStream13();
       // choose name and convert into a char*
-      cout << j << " er3" << endl;
       string filename = "file" + to_string(j) + ".bin";
       char *name = new char[filename.length()];
       strcpy(name, filename.c_str());
       cout << name << endl;
       // create the file
-      cout << j << " er4" << endl;
+      cout << " creation of " << name << " ..." << endl;
       writer->create(name);
-      cout << j << " er5" << endl;
-      delete[] name;
+      cout << "file created " << endl;
+      // delete[] name;
       writer->write(sequence);
       // 2.store the reference
       stream_ref.push(*writer);
-      cout << j << " er6" << endl;
     }
     j += 1;
   }
@@ -141,7 +138,7 @@ int main(int argc, char *argv[]) {
   int l = 0;
   int s = d;
   int x = (int)stream_ref.size();
-  cout << x << " ir0" << endl;
+  cout << "ready for merging" << endl;
   while (x > 1) {
 
     // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
@@ -150,14 +147,12 @@ int main(int argc, char *argv[]) {
     if (x < s) {
       s = x;
     }
-    cout << x << " ir1" << endl;
     vector<vector<int>> sequence_to_merge(s);
-    cout << x << " ir2" << endl;
     for (int k = 0; k < s; k++) {
       OStream13 writer2 = stream_ref.front();
       stream_ref.pop();
       IStream13 reader;
-      cout << x << " ir3" << endl;
+      cout << "open : " << writer2.get_filename() << endl;
       reader.open(writer2.get_filename());
       int length = reader.get_length();
       reader.set_B(length);
@@ -176,15 +171,18 @@ int main(int argc, char *argv[]) {
     // do stuff
 
     writer3->create(name);
-    delete[] name;
+    // delete[] name;
     stream_ref.push(*writer3);
     l += 1;
     s = d;
     x = (int)stream_ref.size(); // number of stream to merge
     cout << "stremref len = " << x << endl;
     merge_sort(sequence_to_merge, output);
+    cout << "output merged -> length = " << output->size() << endl;
     writer3->write(*output);
+    cout << "output written" << endl;
     output->erase(output->begin(), output->end());
+    cout << output->size() << endl;
   }
 
   return 0;

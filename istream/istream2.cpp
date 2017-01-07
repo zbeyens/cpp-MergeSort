@@ -7,6 +7,7 @@ IStream2::IStream2() {}
 void IStream2::open(char *filename) {
     FILE *ifile;
 
+    fn = filename;
     ifile = fopen(filename, "rb");
 
     if (ifile == NULL) {
@@ -30,4 +31,8 @@ bool IStream2::end_of_stream() {
     }
 
     return isEOF;
+}
+
+char * IStream2::get_filename() {
+    return fn;
 }

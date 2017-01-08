@@ -18,7 +18,7 @@ char *buffer;
 public:
 IStream13(int b);
 IStream13();
-void open(char *filename);
+void open(char *filename, int N);
 std::vector<int> read_next();
 bool end_of_stream();
 int get_length();

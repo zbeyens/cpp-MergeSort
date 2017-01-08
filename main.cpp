@@ -21,16 +21,17 @@ using namespace boost::chrono;
 // param 2: factorB
 // param 3: k (max 30)
 // param 4: repeat number for an average
-// param 8: number of int to read (for method 1 and 2)
+// param 8: N: number of int to read (for method 1 and 2).
+//          if N=0, we take the entire file
 
 char * genFilename(string filename);
 void countKmax();
-void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams);
+void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams, int N);
 void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream2> &ostreams);
-void method4open(char *fn,  char *fno,  int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams);
-void method13(IStream13 &reader13, OStream13 &writer13, int N);
+void method4open(char *fn,  char *fno,  int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams, int N);
+void method13(IStream13 &reader13, OStream13 &writer13, int N, int B);
 void method2(IStream2 &reader2, OStream2 &writer2, int N);
-void method4(IStream4 &reader4, OStream4 &writer4);
+void method4(IStream4 &reader4, OStream4 &writer4, int N, int B);
 
 char * genFilename(string filename) {
     return const_cast<char *>(filename.c_str());
@@ -49,9 +50,9 @@ void countKmax() {
     cout << "Your computer can open " << count  << " streams" << endl;
 }
 
-void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams) {
+void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams, int N) {
     IStream13 reader13(B);
-    reader13.open(fn);
+    reader13.open(fn, N);
     istreams.push_back(reader13);
     OStream13 writer13;
     writer13.create(fno);
@@ -76,13 +77,13 @@ void method4open(char *fn, char *fno, int factorB, vector<IStream4> &istreams, v
     ostreams.push_back(writer4);
 }
 
-void method13(IStream13 &reader13, OStream13 &writer13, int N) {
+void method13(IStream13 &reader13, OStream13 &writer13, int N, int B) {
     int n = 0;
 
     while (!reader13.end_of_stream() && n != N) {
         vector<int> newElem = reader13.read_next();
         writer13.write(newElem);
-        n++;
+        n += B;
     }
     writer13.close();
 }
@@ -98,10 +99,13 @@ void method2(IStream2 &reader2, OStream2 &writer2, int N) {
     writer2.close();
 }
 
-void method4(IStream4 &reader4, OStream4 &writer4) {
-    while (!reader4.end_of_stream()) {
+void method4(IStream4 &reader4, OStream4 &writer4, int N, int B) {
+    int n = 0;
+
+    while (!reader4.end_of_stream() && n != N) {
         vector<int> newElem = reader4.read_next();
         writer4.write(newElem);
+        n += B;
     }
     writer4.close();
 }
@@ -150,7 +154,7 @@ int main(int argc, char *argv[]) {
 
             for (int i = 0; i < k; i++) {
                 cout << "Sample " << r << ": reading " << i << endl;
-                method13(istreams[i], ostreams[i], N);
+                method13(istreams[i], ostreams[i], N, B);
             }
         } else if (method == 2) {
             vector<IStream2> istreams;
@@ -183,7 +187,7 @@ int main(int argc, char *argv[]) {
 
             for (int i = 0; i < k; i++) {
                 cout << "Sample " << r << ": reading " << i << endl;
-                method4(istreams[i], ostreams[i]);
+                method4(istreams[i], ostreams[i], N, B);
             }
         }
     }

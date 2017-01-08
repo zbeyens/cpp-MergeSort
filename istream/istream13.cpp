@@ -16,7 +16,7 @@ IStream13::IStream13(int b) {
     offset = 0;
 }
 
-void IStream13::open(char *filename) {
+void IStream13::open(char *filename, int N) {
     int ofile = _open(filename, _O_RDONLY);
 
     if (ofile == -1) {
@@ -24,8 +24,12 @@ void IStream13::open(char *filename) {
         exit(1);
     }
 
-    length = _lseek(ofile, 0, SEEK_END);
-    _lseek(ofile, 0, SEEK_SET);
+    if (N == 0) {
+        length = _lseek(ofile, 0, SEEK_END);
+        _lseek(ofile, 0, SEEK_SET);
+    } else {
+        length = N * 4;
+    }
 
     ofile13 = ofile;
 }

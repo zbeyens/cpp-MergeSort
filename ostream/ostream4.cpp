@@ -8,7 +8,7 @@ void OStream4::create(char *filename) {
     ofile4 = mapped_file_sink();
     param.path = filename;
     param.flags = mapped_file::mapmode::readwrite;
-
+    file_name = string(filename);
     offs = 0;
 }
 
@@ -32,4 +32,8 @@ void OStream4::close() {
 
 void OStream4::set_pointer_w(int place) {
     offs = place;
+}
+
+string OStream4::get_filename() {
+    return file_name;
 }

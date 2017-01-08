@@ -14,6 +14,7 @@ mapped_file_sink ofile4;
 mapped_file_params param;
 int B;
 int *buffer;
+string file_name;
 
 public:
 OStream4();
@@ -21,5 +22,6 @@ OStream4();
 void create(char *filename);
 void write(std::vector<int> elem);
 void close();
+string get_filename();
 void set_pointer_w(int place);
 };

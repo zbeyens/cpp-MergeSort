@@ -8,21 +8,27 @@ IStream4::IStream4(int b) {
     factorB = b;
 }
 
-void IStream4::open(char *filename) {
+void IStream4::open(char *filename, int N) {
     ifile4 = mapped_file_source();
     param.path = filename;
 
-    //First, we map the entire file to store its length
-    ifile4.open(param);
-
-    if (!ifile4.is_open()) {
-        cout << "Error not existing";
-        exit(1);
-    }
-
     //B must be a multiple of 65536
     B = factorB * ifile4.alignment() / 4;
-    len = ifile4.size();
+
+    if (N == 0) {
+        //First, we map the entire file to store its length
+        ifile4.open(param);
+
+        if (!ifile4.is_open()) {
+            cout << "Error not existing";
+            exit(1);
+        }
+
+        len = ifile4.size();
+    } else {
+        len = N * 4;
+    }
+
     ifile4.close();
 }
 

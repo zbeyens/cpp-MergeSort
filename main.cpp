@@ -18,11 +18,11 @@ using namespace std;
 using namespace boost::chrono;
 
 // param 1: method
-// param 2: factorB
-// param 3: k (max 30)
-// param 4: repeat number for an average
-// param 8: N: number of int to read (for method 1 and 2).
+// param 2: k (max 30)
+// param 3: repeat number for an average
+// param 4: N: number of int to read (for method 1 and 2).
 //          if N=0, we take the entire file
+// param 5: factorB
 
 char * genFilename(string filename);
 void countKmax();
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
     //parameters
     int method = atoi(argv[1]);
-    int factorB = atoi(argv[2]);
+    int factorB = atoi(argv[5]);
     int B;
 
     if (method == 1 || method == 2) {
@@ -132,9 +132,9 @@ int main(int argc, char *argv[]) {
     }
 
     cout << "Method " << atoi(argv[1]) << ", B = " << B << endl;
-    int k = atoi(argv[3]);
-    int repeat = atoi(argv[4]);
-    int N = atoi(argv[8]);
+    int k = atoi(argv[2]);
+    int repeat = atoi(argv[3]);
+    int N = atoi(argv[4]);
 
     if (method == 0) {
         countKmax();
@@ -207,28 +207,30 @@ int main(int argc, char *argv[]) {
         duration_cast<milliseconds>(high_resolution_clock::now() - start);
     cout << "Took " << ms.count() << "ms" << endl;
 
-//---------------Part3------------------------------
-// param 5: M: size of the main memory available (first sort phase)
-// param 6: d: the number of streams to merge in one pass (in the later sort
-// phases)
-// param 7: file input
+    //---------------Part3------------------------------
+    // param 5: M: size of the main memory available (first sort phase)
+    // param 6: d: the number of streams to merge in one pass (in the later sort
+    // phases)
+    // param 7: file input
     high_resolution_clock::time_point start2 = high_resolution_clock::now();
 
     if (method == 5) {
         int N;                    // size of the file in 32 bits integer
         // static int M = atoi(argv[5]); // size of a stream in 32 bits integer
-        static int M  = factorB * 65536 / 4;
-        int d = atoi(argv[6]);    // number of streams to merge
-        char *input_file = argv[7];
+        int factorM = atoi(argv[6]);
+        static int M  = factorM * 65536 / 4;
+        int d = atoi(argv[7]);    // number of streams to merge
+        char *input_file = argv[8];
 
-        queue<OStream13> stream_ref;
+        queue<OStream4> stream_ref;
         vector<int> output;
         // reader and writer initialization
-        IStream13 reader3(M);
+        IStream4 reader3(factorM);
         reader3.open(input_file, 0);
         // find N and n
         N = int(reader3.get_length() / 4);
-        int n = ceil(N / M); // number of streams
+        int n = ceil((float)N / (float)M); // number of streams
+        cout << N / M;
         cout << "M = " << M << ", d = " << d << endl;
         cout << "file length = " << reader3.get_length() << ", N = " << N
              << ", nbstreams= " << n << endl;
@@ -244,7 +246,7 @@ int main(int argc, char *argv[]) {
                 // create a stream of M element
                 string filename = "file" + to_string(i) + ".bin";
                 char *name = genFilename(filename);
-                OStream13 writer;
+                OStream4 writer;
                 writer.create(name);
                 writer.write(sequence);
                 stream_ref.push(writer);
@@ -267,21 +269,25 @@ int main(int argc, char *argv[]) {
             vector<vector<int> > sequence_to_merge;
 
             for (int p = 0; p < s; p++) {
-                OStream13 writer2 = stream_ref.front();
+                OStream4 writer2 = stream_ref.front();
                 stream_ref.pop();
                 string filename = writer2.get_filename();
-                IStream13 reader(M);
+                // cout << "opening " << filename << endl;
+                IStream4 reader(factorB);
                 reader.open(genFilename(filename), 0);
 
-                if (!reader.end_of_stream()) {
-                    vector<int> test = reader.read_next();
-                    sequence_to_merge.push_back(test);
+                vector<int> one_stream;
+
+                while (!reader.end_of_stream()) {
+                    vector<int> newElems = reader.read_next();
+                    one_stream.insert(one_stream.end(), newElems.begin(), newElems.end());
                 }
+                sequence_to_merge.push_back(one_stream);
 
                 writer2.close();
             }
 
-            OStream13 writer3;
+            OStream4 writer3;
             string filename = "file_merged" + to_string(l) + ".bin";
 
             if (s == x) {
@@ -296,6 +302,7 @@ int main(int argc, char *argv[]) {
             // delete[] name;
             stream_ref.push(writer3);
             l += 1;
+            s = d;
             x = (int)stream_ref.size(); // number of stream to merge
             // cout << "stremref len = " << x << endl;
             output = merge_sort(sequence_to_merge);

@@ -21,7 +21,7 @@ int *buffer;
 
 public:
 IStream4(int b);
-void open(char *filename);
+void open(char *filename, int N);
 std::vector<int> read_next();
 bool end_of_stream();
 int get_length();

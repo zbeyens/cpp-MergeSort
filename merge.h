@@ -6,7 +6,7 @@ using namespace std;
 
 struct Element {
   int value;
-  int x;
+  unsigned int x;
 };
 
 struct Comp {
@@ -14,4 +14,4 @@ struct Comp {
     return a.value > b.value;
   }
 };
-void merge_sort(vector<vector<int>> listOfStreams,vector<int> *output);
+vector<int> merge_sort(vector<vector<int>> listOfStreams);

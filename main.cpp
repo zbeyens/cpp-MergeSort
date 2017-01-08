@@ -5,14 +5,14 @@
 #include "ostream/ostream13.h"
 #include "ostream/ostream2.h"
 #include "ostream/ostream4.h"
+#include <boost/chrono.hpp>
 #include <cstdlib>
+#include <fstream>
 #include <io.h>
 #include <iostream>
 #include <math.h>
 #include <string>
 #include <utility>
-#include <boost/chrono.hpp>
-#include <fstream>
 
 using namespace std;
 using namespace boost::chrono;
@@ -44,10 +44,9 @@ void countKmax() {
         string fn = to_string(count++);
         f = new ofstream(fn);
     } while (*f << "test" << flush);
-    --count;   // last iteration failed to open the file.
+    --count; // last iteration failed to open the file.
 
-
-    cout << "Your computer can open " << count  << " streams" << endl;
+    cout << "Your computer can open " << count << " streams" << endl;
 }
 
 void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams, int N) {
@@ -146,9 +145,9 @@ int main(int argc, char *argv[]) {
                 char *fno = genFilename(filename);
 
                 if (method == 1) {
-                    method13open(fn, fno, 0, istreams, ostreams);
+                    method13open(fn, fno, 0, istreams, ostreams, N);
                 } else if (method == 3) {
-                    method13open(fn, fno, B, istreams, ostreams);
+                    method13open(fn, fno, B, istreams, ostreams, N);
                 }
             }
 
@@ -192,25 +191,28 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    milliseconds ms = duration_cast<milliseconds> (high_resolution_clock::now() - start);
+    milliseconds ms =
+        duration_cast<milliseconds>(high_resolution_clock::now() - start);
     cout << "Took " << ms.count() << "ms" << endl;
 
 //---------------Part3------------------------------
-//param 5: M: size of the main memory available (first sort phase)
-//param 6: d: the number of streams to merge in one pass (in the later sort phases)
-//param 7: file input
+// param 5: M: size of the main memory available (first sort phase)
+// param 6: d: the number of streams to merge in one pass (in the later sort
+// phases)
+// param 7: file input
+    high_resolution_clock::time_point start2 = high_resolution_clock::now();
+
     if (method == 5) {
-        int N;                     // size of the file in 32 bits integer
+        int N;                    // size of the file in 32 bits integer
         static int M = atoi(argv[5]); // size of a stream in 32 bits integer
-        int d = atoi(argv[6]);     // number of streams to merge
+        int d = atoi(argv[6]);    // number of streams to merge
         char *input_file = argv[7];
 
         queue<OStream13> stream_ref;
-        vector<int> *output = new vector<int>;
-
+        vector<int> output;
         // reader and writer initialization
         IStream13 reader3(M);
-        reader3.open(input_file);
+        reader3.open(input_file, 0);
         // find N and n
         N = int(reader3.get_length() / 4);
         int n = ceil(N / M); // number of streams
@@ -221,9 +223,9 @@ int main(int argc, char *argv[]) {
         // 1.sort each stream
         reader3.set_pointer(0);
 
-        //N/M times
+        // N/M times
         for (int i = 0; i < n; i++) {
-            //read and sort M element of the input file
+            // read and sort M element of the input file
             if (!reader3.end_of_stream()) {
                 // cout << endl << "Split i = " << i << endl;
                 vector<int> sequence = reader3.read_next();
@@ -234,25 +236,24 @@ int main(int argc, char *argv[]) {
                 //     cout << sequence[j] << ",";
                 // }
 
-                //create a stream of M element
+                // create a stream of M element
                 string filename = "file" + to_string(i) + ".bin";
                 char *name = genFilename(filename);
                 OStream13 writer;
                 writer.create(name);
                 writer.write(sequence);
                 stream_ref.push(writer);
-                cout << stream_ref.front().get_filename() << ",,," << endl;
+                // cout << stream_ref.front() << ",,," << endl;
             }
         }
 
-        //WTF ?
-        cout << stream_ref.size() << ",,," << endl;
-
+        // WTF ?
+        // cout << stream_ref.size() << ",,," << endl;
 
         // merge and sort every streams
         int l = 0;
         int x = (int)stream_ref.size();
-        cout << "ready for merging" << endl;
+        // cout << "ready for merging" << endl;
 
         while (x > 1) {
             // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
@@ -260,18 +261,19 @@ int main(int argc, char *argv[]) {
             int s = d;
 
             if (x < s) {
-                cout << "last merge" << endl;
+                // cout << "last merge" << endl;
                 s = x;
             }
 
             vector<vector<int> > sequence_to_merge;
 
             for (int p = 0; p < s; p++) {
-                OStream13 writer = stream_ref.front();
+                OStream13 writer2 = stream_ref.front();
                 stream_ref.pop();
+                string filename = writer2.get_filename();
                 IStream13 reader;
-                cout << "opening " << writer.get_filename() << endl;
-                reader.open(writer.get_filename());
+                // cout << "opening " << filename << endl;
+                reader.open(genFilename(filename), 0);
                 int length = reader.get_length();
                 reader.set_B(length);
 
@@ -279,10 +281,10 @@ int main(int argc, char *argv[]) {
                     sequence_to_merge.push_back(reader.read_next());
                 }
 
-                writer.close();
+                writer2.close();
             }
 
-            OStream13 *writer3 = new OStream13();
+            OStream13 writer3;
             string filename = "file_merged" + to_string(l) + ".bin";
 
             if (s == x) {
@@ -292,21 +294,26 @@ int main(int argc, char *argv[]) {
             char *name = new char[filename.length() + 1];
             strcpy(name, filename.c_str());
             // do stuff
-
-            writer3->create(name);
+            writer3.create(name);
             // delete[] name;
-            stream_ref.push(*writer3);
+            stream_ref.push(writer3);
             l += 1;
             s = d;
             x = (int)stream_ref.size(); // number of stream to merge
-            cout << "stremref len = " << x << endl;
-            merge_sort(sequence_to_merge, output);
-            cout << "output merged -> length = " << output->size() << endl;
-            writer3->write(*output);
+            // cout << "stremref len = " << x << endl;
+            output = merge_sort(sequence_to_merge);
+            // cout << "output merged -> length = " << output.size() << endl;
+            writer3.write(output);
+
+            // for (unsigned int i = 0; i < output.size(); i++) {
+            //   cout << output[i] << endl;
+            // }
             cout << "output written" << endl;
-            output->erase(output->begin(), output->end());
-            cout << output->size() << endl;
+            output.clear();
         }
+        milliseconds ms2 =
+            duration_cast<milliseconds>(high_resolution_clock::now() - start2);
+        cout << "Part3 took : " << ms2.count() << "ms" << endl;
     }
 
     return 0;

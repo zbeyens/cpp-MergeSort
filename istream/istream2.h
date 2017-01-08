@@ -1,6 +1,9 @@
 #include <iostream>
 #include <stdio.h>
+#include <string>
 #include <stdlib.h>
+#include <string.h>
+using namespace std;
 
 class IStream2 {
 private:

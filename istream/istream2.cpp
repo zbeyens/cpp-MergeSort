@@ -1,20 +1,10 @@
 #include "istream2.h"
 
-using namespace std;
 
 IStream2::IStream2() {}
 
 void IStream2::open(char *filename) {
-    FILE *ifile;
-
-    ifile = fopen(filename, "rb");
-
-    if (ifile == NULL) {
-        cout << "Error not existing";
-        exit(1);
-    }
-
-    ifile2 = ifile;
+    ifile2 = fopen(filename, "rb");
 }
 
 int IStream2::read_next() {

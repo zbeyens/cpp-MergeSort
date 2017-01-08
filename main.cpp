@@ -26,9 +26,12 @@ using namespace boost::chrono;
 
 char * genFilename(string filename);
 void countKmax();
-void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vector<OStream13> &ostreams, int N);
-void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream2> &ostreams);
-void method4open(char *fn,  char *fno,  int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams, int N);
+void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams,
+                  vector<OStream13> &ostreams, int N);
+void method2open(char *fn, char *fno, vector<IStream2> &istreams,
+                 vector<OStream2> &ostreams);
+void method4open(char *fn,  char *fno,  int factorB, vector<IStream4> &istreams,
+                 vector<OStream4> &ostreams, int N);
 void method13(IStream13 &reader13, OStream13 &writer13, int N, int B);
 void method2(IStream2 &reader2, OStream2 &writer2, int N);
 void method4(IStream4 &reader4, OStream4 &writer4, int N, int B);
@@ -58,7 +61,8 @@ void method13open(char *fn,  char *fno, int B, vector<IStream13> &istreams, vect
     ostreams.push_back(writer13);
 }
 
-void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream2> &ostreams) {
+void method2open(char *fn, char *fno, vector<IStream2> &istreams,
+                 vector<OStream2> &ostreams) {
     IStream2 reader2 = IStream2();
     reader2.open(fn);
     istreams.push_back(reader2);
@@ -67,9 +71,10 @@ void method2open(char *fn, char *fno, vector<IStream2> &istreams, vector<OStream
     ostreams.push_back(writer2);
 }
 
-void method4open(char *fn, char *fno, int factorB, vector<IStream4> &istreams, vector<OStream4> &ostreams) {
+void method4open(char *fn, char *fno, int factorB, vector<IStream4> &istreams,
+                 vector<OStream4> &ostreams, int N) {
     IStream4 reader4(factorB);
-    reader4.open(fn);
+    reader4.open(fn, N);
     istreams.push_back(reader4);
     OStream4 writer4;
     writer4.create(fno);
@@ -79,7 +84,7 @@ void method4open(char *fn, char *fno, int factorB, vector<IStream4> &istreams, v
 void method13(IStream13 &reader13, OStream13 &writer13, int N, int B) {
     int n = 0;
 
-    while (!reader13.end_of_stream() && n != N) {
+    while (!reader13.end_of_stream() && (n != N || n == 0)) {
         vector<int> newElem = reader13.read_next();
         writer13.write(newElem);
         n += B;
@@ -90,7 +95,7 @@ void method13(IStream13 &reader13, OStream13 &writer13, int N, int B) {
 void method2(IStream2 &reader2, OStream2 &writer2, int N) {
     int n = 0;
 
-    while (!reader2.end_of_stream() && n != N) {
+    while (!reader2.end_of_stream() && (n != N || n == 0)) {
         int newElem = reader2.read_next();
         writer2.write(newElem);
         n++;
@@ -101,7 +106,7 @@ void method2(IStream2 &reader2, OStream2 &writer2, int N) {
 void method4(IStream4 &reader4, OStream4 &writer4, int N, int B) {
     int n = 0;
 
-    while (!reader4.end_of_stream() && n != N) {
+    while (!reader4.end_of_stream() && (n != N || n == 0)) {
         vector<int> newElem = reader4.read_next();
         writer4.write(newElem);
         n += B;
@@ -118,7 +123,14 @@ int main(int argc, char *argv[]) {
     //parameters
     int method = atoi(argv[1]);
     int factorB = atoi(argv[2]);
-    int B = factorB * 65536 / 4;
+    int B;
+
+    if (method == 1 || method == 2) {
+        B = 1;
+    } else {
+        B = factorB * 65536 / 4;
+    }
+
     cout << "Method " << atoi(argv[1]) << ", B = " << B << endl;
     int k = atoi(argv[3]);
     int repeat = atoi(argv[4]);
@@ -181,7 +193,7 @@ int main(int argc, char *argv[]) {
                 char *fn = genFilename(filename);
                 filename = "filegen/o" + to_string(i + 1) + ".bin";
                 char *fno = genFilename(filename);
-                method4open(fn, fno, factorB, istreams, ostreams);
+                method4open(fn, fno, factorB, istreams, ostreams, N);
             }
 
             for (int i = 0; i < k; i++) {
@@ -204,7 +216,8 @@ int main(int argc, char *argv[]) {
 
     if (method == 5) {
         int N;                    // size of the file in 32 bits integer
-        static int M = atoi(argv[5]); // size of a stream in 32 bits integer
+        // static int M = atoi(argv[5]); // size of a stream in 32 bits integer
+        static int M  = factorB * 65536 / 4;
         int d = atoi(argv[6]);    // number of streams to merge
         char *input_file = argv[7];
 
@@ -221,20 +234,12 @@ int main(int argc, char *argv[]) {
              << ", nbstreams= " << n << endl;
 
         // 1.sort each stream
-        reader3.set_pointer(0);
-
         // N/M times
         for (int i = 0; i < n; i++) {
             // read and sort M element of the input file
             if (!reader3.end_of_stream()) {
-                // cout << endl << "Split i = " << i << endl;
                 vector<int> sequence = reader3.read_next();
-                // cout << "sequence size = " << sequence.size() << endl;
                 sort(sequence.begin(), sequence.end());
-
-                // for (size_t j = 0; j < sequence.size(); j++) {
-                //     cout << sequence[j] << ",";
-                // }
 
                 // create a stream of M element
                 string filename = "file" + to_string(i) + ".bin";
@@ -243,17 +248,12 @@ int main(int argc, char *argv[]) {
                 writer.create(name);
                 writer.write(sequence);
                 stream_ref.push(writer);
-                // cout << stream_ref.front() << ",,," << endl;
             }
         }
-
-        // WTF ?
-        // cout << stream_ref.size() << ",,," << endl;
 
         // merge and sort every streams
         int l = 0;
         int x = (int)stream_ref.size();
-        // cout << "ready for merging" << endl;
 
         while (x > 1) {
             // verify if 1) x < d 2) the pointer of the stream isn't bigger than the
@@ -261,7 +261,6 @@ int main(int argc, char *argv[]) {
             int s = d;
 
             if (x < s) {
-                // cout << "last merge" << endl;
                 s = x;
             }
 
@@ -271,14 +270,12 @@ int main(int argc, char *argv[]) {
                 OStream13 writer2 = stream_ref.front();
                 stream_ref.pop();
                 string filename = writer2.get_filename();
-                IStream13 reader;
-                // cout << "opening " << filename << endl;
+                IStream13 reader(M);
                 reader.open(genFilename(filename), 0);
-                int length = reader.get_length();
-                reader.set_B(length);
 
                 if (!reader.end_of_stream()) {
-                    sequence_to_merge.push_back(reader.read_next());
+                    vector<int> test = reader.read_next();
+                    sequence_to_merge.push_back(test);
                 }
 
                 writer2.close();
@@ -295,20 +292,21 @@ int main(int argc, char *argv[]) {
             strcpy(name, filename.c_str());
             // do stuff
             writer3.create(name);
+
             // delete[] name;
             stream_ref.push(writer3);
             l += 1;
-            s = d;
             x = (int)stream_ref.size(); // number of stream to merge
             // cout << "stremref len = " << x << endl;
             output = merge_sort(sequence_to_merge);
-            // cout << "output merged -> length = " << output.size() << endl;
+            cout << "output merged -> length = " << output.size() << endl;
             writer3.write(output);
 
             // for (unsigned int i = 0; i < output.size(); i++) {
-            //   cout << output[i] << endl;
+            //     cout << output[i] << endl;
             // }
-            cout << "output written" << endl;
+
+            // cout << "output written" << endl;
             output.clear();
         }
         milliseconds ms2 =

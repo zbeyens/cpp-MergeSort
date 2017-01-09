@@ -19,6 +19,7 @@ void OStream4::write(vector<int> elems) {
 
     ofile4.open(param);
 
+
     buffer = (int *)ofile4.data();
     copy(elems.begin(), elems.end(), buffer);
 

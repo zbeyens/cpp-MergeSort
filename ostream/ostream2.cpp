@@ -5,16 +5,12 @@ using namespace std;
 OStream2::OStream2() {}
 
 void OStream2::create(char *filename) {
-    FILE *ofile;
+    ofile2 = fopen(filename, "wb");
 
-    ofile = fopen(filename, "wb");
-
-    if (ofile == NULL) {
+    if (ofile2 == NULL) {
         cout << "Error not existing";
         exit(1);
     }
-
-    ofile2 = ofile;
 }
 
 void OStream2::write(int elem) {

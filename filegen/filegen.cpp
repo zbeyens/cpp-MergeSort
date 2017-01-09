@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
     int nfile = 1;
 
-    while (nfile <= 10) {
+    while (nfile <= 30) {
         OStream4 writer;
         string file_1 = to_string(nfile) + ".bin";
 

@@ -7,9 +7,9 @@
 #include "ostream/ostream4.h"
 #include <boost/chrono.hpp>
 #include <cstdlib>
-#include <fstream>
 #include <io.h>
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #include <string>
 #include <utility>
@@ -106,11 +106,15 @@ void method2(IStream2 &reader2, OStream2 &writer2, int N) {
 void method4(IStream4 &reader4, OStream4 &writer4, int N, int B) {
     int n = 0;
 
+    vector<int> stream;
+
     while (!reader4.end_of_stream() && (n != N || n == 0)) {
         vector<int> newElem = reader4.read_next();
-        writer4.write(newElem);
+        stream.insert(stream.end(), newElem.begin(), newElem.end());
+
         n += B;
     }
+    writer4.write(stream);
     writer4.close();
 }
 
@@ -122,8 +126,38 @@ int main(int argc, char *argv[]) {
 
     //parameters
     int method = atoi(argv[1]);
+
     int factorB = atoi(argv[5]);
     int B;
+    int k = atoi(argv[2]);
+    int repeat = atoi(argv[3]);
+    int N = atoi(argv[4]);
+
+    // vector<int> all_k;
+    //
+    // for (size_t i =  27; i < 30; i++) {
+    //     all_k.push_back(i + 1);
+    // }
+
+    // vector<int> all_N = {
+    //     100,   1000,   2000,   3000,   4000,   5000,   10000,   20000,   30000,
+    //     40000, 50000,  60000,  70000,  80000
+    // };
+    // vector<int> all_B;
+    //
+    // for (size_t i = 500; i < 520; i += 2) {
+    //     all_B.push_back(i * 65536 / 4);
+    // }
+
+    // vector<int> all_m = {
+    //     2
+    // };
+    // vector<vector<int> > all_time;
+
+    // for (size_t mcur = 0; mcur < all_m.size(); mcur++) {
+    //     method = all_m[mcur];
+
+    cout << "Method " << method << endl;
 
     if (method == 1 || method == 2) {
         B = 1;
@@ -131,21 +165,28 @@ int main(int argc, char *argv[]) {
         B = factorB * 65536 / 4;
     }
 
-    cout << "Method " << atoi(argv[1]) << ", B = " << B << endl;
-    int k = atoi(argv[2]);
-    int repeat = atoi(argv[3]);
-    int N = atoi(argv[4]);
+    cout << "B = " << B << endl;
 
     if (method == 0) {
         countKmax();
     }
 
-    //start chrono
-    high_resolution_clock::time_point start = high_resolution_clock::now();
+    // vector<int> mtime_cur;
 
-    //read k streams and write them, N times
+    // for (size_t kcur = 0; kcur < all_k.size(); kcur++) {
+    //     k = all_k[kcur];
+    // for (size_t ncur = 0; ncur < all_N.size(); ncur++) {
+    //     N = all_N[ncur];
+    // for (size_t bcur = 0; bcur < all_B.size(); bcur++) {
+    //     B = all_B[bcur];
+    //     factorB = B * 4 / 65536;
+    int time_average = 0;
 
     for (int r = 0; r < repeat; r++) {
+        //start chrono
+        high_resolution_clock::time_point start = high_resolution_clock::now();
+        cout << "Sample " << r << ": reading " << k << endl;
+
         if (method == 1 || method == 3) {
             vector<IStream13> istreams;
             vector<OStream13> ostreams;
@@ -164,7 +205,6 @@ int main(int argc, char *argv[]) {
             }
 
             for (int i = 0; i < k; i++) {
-                cout << "Sample " << r << ": reading " << i << endl;
                 method13(istreams[i], ostreams[i], N, B);
             }
         } else if (method == 2) {
@@ -181,7 +221,6 @@ int main(int argc, char *argv[]) {
             }
 
             for (int i = 0; i < k; i++) {
-                cout << "Sample " << r << ": reading " << i << endl;
                 method2(istreams[i], ostreams[i], N);
             }
         } else if (method == 4) {
@@ -197,22 +236,61 @@ int main(int argc, char *argv[]) {
             }
 
             for (int i = 0; i < k; i++) {
-                cout << "Sample " << r << ": reading " << i << endl;
                 method4(istreams[i], ostreams[i], N, B);
             }
         }
+
+        milliseconds ms =
+            duration_cast<milliseconds>(high_resolution_clock::now() - start);
+        cout << "Part1 took : " << ms.count() << "ms" << endl;
+        time_average += ms.count();
     }
 
-    milliseconds ms =
-        duration_cast<milliseconds>(high_resolution_clock::now() - start);
-    cout << "Took " << ms.count() << "ms" << endl;
+    time_average /= repeat;
+    cout << "Average: " << time_average << endl;
+    // mtime_cur.push_back(time_average);
+    // }
+
+    // all_time.push_back(mtime_cur);
+    // }
+
+    cout << "ok" << endl;
+    //PLOT
+    // string name = "aplot";
+    // //  Write the data file.
+    //
+    // string data_filename = name + "_data.txt";
+    //
+    // ofstream data_u;
+    // data_u.open(data_filename.c_str());
+    //
+    // for (size_t j = 0; j < all_k.size(); j++) {
+    //     data_u << all_k[j];
+    //     // for (size_t j = 0; j < all_N.size(); j++) {
+    //     //     data_u << all_N[j];
+    //     // for (size_t j = 0; j < all_B.size(); j++) {
+    //     // data_u << all_B[j];
+    //
+    //     for (size_t po = 0; po < all_m.size(); po++) {
+    //         data_u << "  " << all_time[po][j];
+    //     }
+    //
+    //     data_u << "\n";
+    // }
+    //
+    // data_u.close();
+    //
+    // cout << "\n";
+    // cout << "  Plot data written to the files" << "\n";
+
 
     //---------------Part3------------------------------
-    // param 5: M: size of the main memory available (first sort phase)
-    // param 6: d: the number of streams to merge in one pass (in the later sort
+    // param 6: M: size of the main memory available (first sort phase)
+    // param 7: d: the number of streams to merge in one pass (in the later sort
     // phases)
-    // param 7: file input
+    // param 8: file input
     high_resolution_clock::time_point start2 = high_resolution_clock::now();
+    method = atoi(argv[1]);
 
     if (method == 5) {
         int N;                    // size of the file in 32 bits integer

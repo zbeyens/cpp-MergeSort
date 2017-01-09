@@ -1,0 +1,12 @@
+set term png
+set title 'N = 1000000, B = 16384'
+set output "aplot.png"
+set grid
+set style data lines
+set key autotitle columnheader
+set xlabel 'k'
+set ylabel 'Time (ms)'
+plot "aplot_data.txt" using 1:2 title 'Method 2' with lines, \
+     "aplot_data.txt" using 1:3 title 'Method 3' with lines, \
+     "aplot_data.txt" using 1:4 title 'Method 4' with lines
+quit
